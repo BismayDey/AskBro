@@ -13,7 +13,9 @@ import { ref, set, push } from "firebase/database";
 import { collection, addDoc } from "firebase/firestore";
 import toast from "react-hot-toast";
 
-const API_KEY = process.env.NEXT_PUBLIC_API_KEY;
+// Use your API key directly (for testing purposes only)
+const API_KEY =
+  "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";
 
 function App() {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -106,6 +108,8 @@ function App() {
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${API_KEY}`,
+            "HTTP-Referer": window.location.origin, // Add referer header
+            "X-Title": "Ask Bro", // Add title header
           },
           body: JSON.stringify({
             model: "deepseek/deepseek-r1-zero", // Keep your model

@@ -13,6 +13,9 @@ import { ref, set, push } from "firebase/database";
 import { collection, addDoc } from "firebase/firestore";
 import toast from "react-hot-toast";
 
+// Log the API key to ensure it's being read correctly
+console.log("API Key:", process.env.NEXT_PUBLIC_API_KEY);
+
 const API_KEY = process.env.NEXT_PUBLIC_API_KEY;
 
 function App() {
@@ -99,6 +102,13 @@ function App() {
     await saveToFirebase(userMessage);
 
     try {
+      // Log the API key and request URL for debugging
+      console.log("Making request to API with key:", API_KEY);
+      console.log(
+        "Request URL:",
+        "https://api.openrouter.ai/api/v1/chat/completions"
+      );
+
       const response = await fetch(
         "https://api.openrouter.ai/api/v1/chat/completions",
         {
@@ -132,6 +142,8 @@ function App() {
       }
 
       const data: ChatResponse = await response.json();
+      console.log("API Response:", data);
+
       const assistantMessage: Message = {
         role: "assistant",
         content: data.choices[0].message.content,
@@ -142,7 +154,7 @@ function App() {
       setMessages((prev) => [...prev, assistantMessage]);
       await saveToFirebase(assistantMessage);
     } catch (error) {
-      console.error("Error:", error);
+      console.error("Fetch error:", error);
       setError(true);
       toast.error("Oops! Something went wrong. Please try again.");
       setMessages((prev) => [

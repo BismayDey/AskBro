@@ -128,7 +128,7 @@ function App() {
       );
 
       if (!response.ok) {
-        throw new Error("API request failed");
+        throw new Error(`API request failed with status ${response.status}`);
       }
 
       const data: ChatResponse = await response.json();

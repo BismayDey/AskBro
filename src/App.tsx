@@ -1,21 +1,27 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Send } from "lucide-react";
-import { Message, ChatResponse, Theme } from "./types";
+import { Message, ChatResponse, Theme, UserSettings } from "./types";
 import { ChatMessage } from "./components/ChatMessage";
 import { IntroAnimation } from "./components/IntroAnimation";
 import { ThemeToggle } from "./components/ThemeToggle";
 import { LoadingAnimation } from "./components/LoadingAnimation";
 import { AuthModal } from "./components/AuthModal";
 import { UserProfile } from "./components/UserProfile";
+import { SettingsModal } from "./components/SettingsModal";
 import { auth, db, firestore } from "./lib/firebase";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { ref, set, push } from "firebase/database";
-import { collection, addDoc } from "firebase/firestore";
+import { collection, addDoc, doc, getDoc, setDoc } from "firebase/firestore";
 import toast from "react-hot-toast";
 
-// Use your API key directly (for testing purposes only)
-const API_KEY =
-  "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";
+const API_KEY = process.env.NEXT_PUBLIC_API_KEY;
+
+const defaultSettings: UserSettings = {
+  theme: "system",
+  fontSize: "medium",
+  messageSpacing: "comfortable",
+  soundEnabled: true,
+};
 
 function App() {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -24,15 +30,10 @@ function App() {
   const [showIntro, setShowIntro] = useState(true);
   const [error, setError] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [user] = useAuthState(auth);
-  const [theme, setTheme] = useState<Theme>(() => {
-    if (typeof window !== "undefined") {
-      return window.matchMedia("(prefers-color-scheme: dark)").matches
-        ? "dark"
-        : "light";
-    }
-    return "light";
-  });
+  const [userSettings, setUserSettings] =
+    useState<UserSettings>(defaultSettings);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -44,8 +45,30 @@ function App() {
   }, []);
 
   useEffect(() => {
+    if (user) {
+      const fetchUserSettings = async () => {
+        const userDoc = await getDoc(doc(firestore, `users/${user.uid}`));
+        if (userDoc.exists()) {
+          setUserSettings(userDoc.data().settings || defaultSettings);
+        } else {
+          await setDoc(doc(firestore, `users/${user.uid}`), {
+            settings: defaultSettings,
+          });
+        }
+      };
+      fetchUserSettings();
+    }
+  }, [user]);
+
+  useEffect(() => {
+    const theme =
+      userSettings.theme === "system"
+        ? window.matchMedia("(prefers-color-scheme: dark)").matches
+          ? "dark"
+          : "light"
+        : userSettings.theme;
     document.documentElement.classList.toggle("dark", theme === "dark");
-  }, [theme]);
+  }, [userSettings.theme]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -59,7 +82,6 @@ function App() {
     if (!user) return;
 
     try {
-      // Save to Realtime Database
       const chatRef = ref(db, `chats/${user.uid}`);
       const newChatRef = push(chatRef);
       await set(newChatRef, {
@@ -67,7 +89,6 @@ function App() {
         timestamp: Date.now(),
       });
 
-      // Save to Firestore
       await addDoc(collection(firestore, `users/${user.uid}/history`), {
         ...message,
         timestamp: Date.now(),
@@ -102,17 +123,17 @@ function App() {
 
     try {
       const response = await fetch(
-        "https://openrouter.ai/api/v1/chat/completions",
+        "https://api.openrouter.ai/api/v1/chat/completions",
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${API_KEY}`,
-            "HTTP-Referer": window.location.origin, // Add referer header
-            "X-Title": "Ask Bro", // Add title header
+            "HTTP-Referer": window.location.origin,
+            "X-Title": "Ask Bro",
           },
           body: JSON.stringify({
-            model: "deepseek/deepseek-r1-zero", // Keep your model
+            model: "deepseek/deepseek-r1-zero",
             messages: [
               {
                 role: "system",
@@ -121,13 +142,16 @@ function App() {
               },
               ...messages,
               userMessage,
-            ],
+            ].map((msg) => ({
+              role: msg.role,
+              content: msg.content,
+            })),
           }),
         }
       );
 
       if (!response.ok) {
-        throw new Error(`API request failed with status ${response.status}`);
+        throw new Error("API request failed");
       }
 
       const data: ChatResponse = await response.json();
@@ -138,10 +162,16 @@ function App() {
         timestamp: Date.now(),
       };
 
+      if (userSettings.soundEnabled) {
+        new Audio(
+          "data:audio/wav;base64,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"
+        );
+      }
+
       setMessages((prev) => [...prev, assistantMessage]);
       await saveToFirebase(assistantMessage);
     } catch (error) {
-      console.error("Fetch error:", error);
+      console.error("Error:", error);
       setError(true);
       toast.error("Oops! Something went wrong. Please try again.");
       setMessages((prev) => [
@@ -175,7 +205,10 @@ function App() {
         </h1>
         <div className="flex items-center gap-4">
           {user ? (
-            <UserProfile user={user} />
+            <UserProfile
+              user={user}
+              onOpenSettings={() => setShowSettingsModal(true)}
+            />
           ) : (
             <button
               onClick={() => setShowAuthModal(true)}
@@ -185,14 +218,34 @@ function App() {
             </button>
           )}
           <ThemeToggle
-            theme={theme}
-            onToggle={() => setTheme(theme === "light" ? "dark" : "light")}
+            theme={userSettings.theme}
+            onToggle={() => {
+              const newTheme =
+                userSettings.theme === "light" ? "dark" : "light";
+              setUserSettings({ ...userSettings, theme: newTheme });
+            }}
           />
         </div>
       </header>
 
-      <main className="flex-1 overflow-y-auto p-4">
-        <div className="max-w-3xl mx-auto space-y-4">
+      <main
+        className={`flex-1 overflow-y-auto p-4 ${
+          userSettings.messageSpacing === "compact"
+            ? "space-y-2"
+            : userSettings.messageSpacing === "comfortable"
+            ? "space-y-4"
+            : "space-y-6"
+        }`}
+      >
+        <div
+          className={`max-w-3xl mx-auto ${
+            userSettings.fontSize === "small"
+              ? "text-sm"
+              : userSettings.fontSize === "large"
+              ? "text-lg"
+              : "text-base"
+          }`}
+        >
           {messages.map((message, index) => (
             <ChatMessage key={index} message={message} />
           ))}
@@ -228,6 +281,15 @@ function App() {
         isOpen={showAuthModal}
         onClose={() => setShowAuthModal(false)}
       />
+      {user && (
+        <SettingsModal
+          isOpen={showSettingsModal}
+          onClose={() => setShowSettingsModal(false)}
+          settings={userSettings}
+          onUpdateSettings={setUserSettings}
+          userId={user.uid}
+        />
+      )}
     </div>
   );
 }

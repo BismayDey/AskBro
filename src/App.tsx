@@ -133,7 +133,7 @@ function App() {
             "X-Title": "Ask Bro",
           },
           body: JSON.stringify({
-            model: "deepseek/deepseek-r1-zero",
+            model: "oogle/gemma-3-1b-it:free",
             messages: [
               {
                 role: "system",

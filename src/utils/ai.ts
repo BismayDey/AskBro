@@ -569,7 +569,7 @@ export const fetchAIResponse = async (
           "X-Title": "Ask Bro",
         },
         body: JSON.stringify({
-          model: "minimax/minimax-m2:free",
+          model: "meta-llama/llama-4-maverick:free",
           messages: [
             {
               role: "system",

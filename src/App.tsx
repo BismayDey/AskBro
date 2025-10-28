@@ -261,11 +261,11 @@ function App() {
       );
 
       // Check for mode switch command in AI response
-      const modeSwitchMatch = aiResponse.match(/\[MODE_SWITCH:(\w+)\]/);
+      const modeSwitchMatch = aiResponse.match(/\[MODE_SWITCH:(\w+)\]/i);
       let finalResponse = aiResponse;
 
       if (modeSwitchMatch) {
-        const newModeName = modeSwitchMatch[1];
+        const newModeName = modeSwitchMatch[1].toLowerCase();
         // Map mode names to our internal mode identifiers
         const modeMapping: {
           [key: string]: {
@@ -390,15 +390,32 @@ function App() {
           setIsCodeGenerator(modeInfo.isCodeGenerator);
           setCurrentMode(modeInfo.displayName);
           setCurrentModeData(modeInfo.data || null);
+
+          // Show a toast notification for mode change
+          toast.success(`🔄 Switched to ${modeInfo.displayName} mode!`, {
+            duration: 3000,
+          });
         }
 
         // Remove the mode switch command from the displayed response
-        finalResponse = aiResponse.replace(/\[MODE_SWITCH:\w+\]/, "").trim();
+        finalResponse = aiResponse.replace(/\[MODE_SWITCH:\w+\]/gi, "").trim();
       }
+
+      // Clean and format the response
+      let formattedResponse = finalResponse.trim();
+
+      // Remove any remaining mode switch commands (double check)
+      formattedResponse = formattedResponse
+        .replace(/\[MODE_SWITCH:\w+\]/gi, "")
+        .trim();
+
+      // Clean up multiple spaces and newlines
+      formattedResponse = formattedResponse.replace(/\n{3,}/g, "\n\n");
+      formattedResponse = formattedResponse.replace(/ {2,}/g, " ");
 
       const assistantMessage: Message = {
         role: "assistant",
-        content: finalResponse,
+        content: formattedResponse,
         userId: user.uid,
         timestamp: Date.now(),
       };

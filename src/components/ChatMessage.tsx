@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { User, Bot, Copy, Edit3, Clock } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { motion } from "framer-motion";
@@ -37,6 +37,9 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
   userName,
 }) => {
   const isUser = message.role === "user";
+  const [copyStatus, setCopyStatus] = useState<"idle" | "copying" | "copied">(
+    "idle"
+  );
 
   const formatTime = (timestamp?: number) => {
     if (!timestamp) return "";
@@ -47,11 +50,16 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
   };
 
   const copyToClipboard = async (text: string) => {
+    setCopyStatus("copying");
     try {
       await navigator.clipboard.writeText(text);
+      setCopyStatus("copied");
       if (onCopy) onCopy(text);
+      // Reset after 2 seconds
+      setTimeout(() => setCopyStatus("idle"), 2000);
     } catch (err) {
       console.error("Failed to copy text: ", err);
+      setCopyStatus("idle");
     }
   };
 
@@ -183,11 +191,41 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
             )}
             <button
               onClick={() => copyToClipboard(message.content)}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-lg text-xs font-medium transition-colors"
-              title="Copy message"
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 ${
+                copyStatus === "copied"
+                  ? "bg-green-100 hover:bg-green-200 dark:bg-green-900/30 dark:hover:bg-green-900/40 text-green-700 dark:text-green-300"
+                  : copyStatus === "copying"
+                  ? "bg-blue-100 hover:bg-blue-200 dark:bg-blue-900/30 dark:hover:bg-blue-900/40 text-blue-700 dark:text-blue-300"
+                  : "bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200"
+              }`}
+              title={copyStatus === "copied" ? "Copied!" : "Copy message"}
             >
-              <Copy size={12} />
-              Copy
+              {copyStatus === "copied" ? (
+                <>
+                  <svg
+                    className="w-3 h-3"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                  Copied!
+                </>
+              ) : copyStatus === "copying" ? (
+                <>
+                  <div className="w-3 h-3 border border-current border-t-transparent rounded-full animate-spin"></div>
+                  Copying...
+                </>
+              ) : (
+                <>
+                  <Copy size={12} />
+                  Copy
+                </>
+              )}
             </button>
           </div>
         )}

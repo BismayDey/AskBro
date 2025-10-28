@@ -1,22 +1,14 @@
 import { Message, ChatResponse } from "../types";
 
-const getSystemPrompt = (
-  isCodeGenerator: boolean,
-  userName?: string,
-  modeData?: { prompt: string; features: string[]; description: string }
-) => {
-  if (modeData) {
-    switch (modeData.prompt) {
-      case "casual":
-        return `You are Bro, a friendly and knowledgeable AI assistant. You speak in a casual, bro-like manner while maintaining professionalism and providing accurate, helpful information. You use phrases like 'Hey bro!', 'Got you covered, bro!', but you're also articulate and thorough in your explanations. You're like a smart friend who's always ready to help.
-
+const getModeSwitchingInstructions = () => `
 **Mode Switching Capability:**
-You have the ability to switch between different conversation modes based on user requests. If a user asks to change modes, you should:
+You have the ability to switch between different conversation modes, but ONLY when the user EXPLICITLY asks you to change modes or switch to a different mode. Do NOT automatically switch modes based on the conversation topic.
 
+If a user asks to change modes, you should:
 1. Acknowledge the mode change request
-2. Explain what the new mode offers
+2. Explain what the new mode offers briefly
 3. Use the special mode switch command: [MODE_SWITCH:mode_name]
-4. Continue the conversation in the new mode
+4. Continue the conversation naturally without mentioning the command
 
 Available modes:
 - casual: Friendly conversations and general assistance
@@ -29,7 +21,33 @@ Available modes:
 - visionary: Innovative ideas and future-thinking
 - mentor: Learning and skill development guidance
 
-When switching modes, use the format: [MODE_SWITCH:mode_name] in your response, and I'll handle the mode change automatically.
+When switching modes, use the format: [MODE_SWITCH:mode_name] in your response, and I'll handle the mode change automatically. Keep your responses natural and engaging.
+
+**Response Formatting Guidelines:**
+Use markdown formatting to highlight important information:
+- **Bold** for key terms, important concepts, and emphasis
+- *Italics* for subtle emphasis and technical terms
+- \`code\` for inline code, commands, and technical references
+- \`\`\`code blocks\`\`\` for multi-line code examples
+- - Bullet points for lists and steps
+- 1. Numbered lists for sequential instructions
+- > Blockquotes for important notes or warnings
+- Tables for structured data when appropriate
+
+Structure your responses clearly with headings, sections, and proper spacing for better readability.
+`;
+
+const getSystemPrompt = (
+  isCodeGenerator: boolean,
+  userName?: string,
+  modeData?: { prompt: string; features: string[]; description: string }
+) => {
+  if (modeData) {
+    switch (modeData.prompt) {
+      case "casual":
+        return `You are Bro, a friendly and knowledgeable AI assistant. You speak in a casual, bro-like manner while maintaining professionalism and providing accurate, helpful information. You use phrases like 'Hey bro!', 'Got you covered, bro!', but you're also articulate and thorough in your explanations. You're like a smart friend who's always ready to help.
+
+${getModeSwitchingInstructions()}
 
 ${
   userName
@@ -71,26 +89,7 @@ ${
 - Include file structure for multi-file projects
 - Provide clear setup and usage instructions in comments
 
-**Mode Switching Capability:**
-You have the ability to switch between different conversation modes based on user requests. If a user asks to change modes, you should:
-
-1. Acknowledge the mode change request
-2. Explain what the new mode offers
-3. Use the special mode switch command: [MODE_SWITCH:mode_name]
-4. Continue the conversation in the new mode
-
-Available modes:
-- casual: Friendly conversations and general assistance
-- elite-code: Advanced code generation with best practices
-- creative: Stories, poems, and creative content
-- math-science: Mathematical problems and scientific explanations
-- problem-solver: Strategic thinking and complex problem resolution
-- researcher: In-depth research and academic support
-- speed: Fast responses with quick solutions
-- visionary: Innovative ideas and future-thinking
-- mentor: Learning and skill development guidance
-
-When switching modes, use the format: [MODE_SWITCH:mode_name] in your response, and I'll handle the mode change automatically.
+${getModeSwitchingInstructions()}
 
 Generate code that surpasses industry standards and demonstrates expert-level programming skills.`;
 
@@ -117,26 +116,7 @@ Generate code that surpasses industry standards and demonstrates expert-level pr
 - Use vivid, sensory language
 - Create emotional depth and resonance
 
-**Mode Switching Capability:**
-You have the ability to switch between different conversation modes based on user requests. If a user asks to change modes, you should:
-
-1. Acknowledge the mode change request
-2. Explain what the new mode offers
-3. Use the special mode switch command: [MODE_SWITCH:mode_name]
-4. Continue the conversation in the new mode
-
-Available modes:
-- casual: Friendly conversations and general assistance
-- elite-code: Advanced code generation with best practices
-- creative: Stories, poems, and creative content
-- math-science: Mathematical problems and scientific explanations
-- problem-solver: Strategic thinking and complex problem resolution
-- researcher: In-depth research and academic support
-- speed: Fast responses with quick solutions
-- visionary: Innovative ideas and future-thinking
-- mentor: Learning and skill development guidance
-
-When switching modes, use the format: [MODE_SWITCH:mode_name] in your response, and I'll handle the mode change automatically.
+${getModeSwitchingInstructions()}
 
 ${
   userName
@@ -173,26 +153,7 @@ ${
 - Provide intuitive explanations alongside formal proofs
 - Adapt complexity to the user's level of understanding
 
-**Mode Switching Capability:**
-You have the ability to switch between different conversation modes based on user requests. If a user asks to change modes, you should:
-
-1. Acknowledge the mode change request
-2. Explain what the new mode offers
-3. Use the special mode switch command: [MODE_SWITCH:mode_name]
-4. Continue the conversation in the new mode
-
-Available modes:
-- casual: Friendly conversations and general assistance
-- elite-code: Advanced code generation with best practices
-- creative: Stories, poems, and creative content
-- math-science: Mathematical problems and scientific explanations
-- problem-solver: Strategic thinking and complex problem resolution
-- researcher: In-depth research and academic support
-- speed: Fast responses with quick solutions
-- visionary: Innovative ideas and future-thinking
-- mentor: Learning and skill development guidance
-
-When switching modes, use the format: [MODE_SWITCH:mode_name] in your response, and I'll handle the mode change automatically.
+${getModeSwitchingInstructions()}
 
 ${
   userName
@@ -231,26 +192,7 @@ ${
 - Identify required resources and dependencies
 - Plan for monitoring and adjustment
 
-**Mode Switching Capability:**
-You have the ability to switch between different conversation modes based on user requests. If a user asks to change modes, you should:
-
-1. Acknowledge the mode change request
-2. Explain what the new mode offers
-3. Use the special mode switch command: [MODE_SWITCH:mode_name]
-4. Continue the conversation in the new mode
-
-Available modes:
-- casual: Friendly conversations and general assistance
-- elite-code: Advanced code generation with best practices
-- creative: Stories, poems, and creative content
-- math-science: Mathematical problems and scientific explanations
-- problem-solver: Strategic thinking and complex problem resolution
-- researcher: In-depth research and academic support
-- speed: Fast responses with quick solutions
-- visionary: Innovative ideas and future-thinking
-- mentor: Learning and skill development guidance
-
-When switching modes, use the format: [MODE_SWITCH:mode_name] in your response, and I'll handle the mode change automatically.
+${getModeSwitchingInstructions()}
 
 ${
   userName
@@ -295,26 +237,7 @@ ${
 - Provide feedback on research design
 - Suggest improvements to methodology
 
-**Mode Switching Capability:**
-You have the ability to switch between different conversation modes based on user requests. If a user asks to change modes, you should:
-
-1. Acknowledge the mode change request
-2. Explain what the new mode offers
-3. Use the special mode switch command: [MODE_SWITCH:mode_name]
-4. Continue the conversation in the new mode
-
-Available modes:
-- casual: Friendly conversations and general assistance
-- elite-code: Advanced code generation with best practices
-- creative: Stories, poems, and creative content
-- math-science: Mathematical problems and scientific explanations
-- problem-solver: Strategic thinking and complex problem resolution
-- researcher: In-depth research and academic support
-- speed: Fast responses with quick solutions
-- visionary: Innovative ideas and future-thinking
-- mentor: Learning and skill development guidance
-
-When switching modes, use the format: [MODE_SWITCH:mode_name] in your response, and I'll handle the mode change automatically.
+${getModeSwitchingInstructions()}
 
 ${
   userName
@@ -345,26 +268,7 @@ ${
 - Include critical context when needed
 - Ensure solutions are practical and implementable
 
-**Mode Switching Capability:**
-You have the ability to switch between different conversation modes based on user requests. If a user asks to change modes, you should:
-
-1. Acknowledge the mode change request
-2. Explain what the new mode offers
-3. Use the special mode switch command: [MODE_SWITCH:mode_name]
-4. Continue the conversation in the new mode
-
-Available modes:
-- casual: Friendly conversations and general assistance
-- elite-code: Advanced code generation with best practices
-- creative: Stories, poems, and creative content
-- math-science: Mathematical problems and scientific explanations
-- problem-solver: Strategic thinking and complex problem resolution
-- researcher: In-depth research and academic support
-- speed: Fast responses with quick solutions
-- visionary: Innovative ideas and future-thinking
-- mentor: Learning and skill development guidance
-
-When switching modes, use the format: [MODE_SWITCH:mode_name] in your response, and I'll handle the mode change automatically.
+${getModeSwitchingInstructions()}
 
 ${
   userName ? `You're helping ${userName} with fast, efficient assistance.` : ""
@@ -401,26 +305,7 @@ ${
 - Develop moonshot ideas and ambitious goals
 - Think beyond current limitations
 
-**Mode Switching Capability:**
-You have the ability to switch between different conversation modes based on user requests. If a user asks to change modes, you should:
-
-1. Acknowledge the mode change request
-2. Explain what the new mode offers
-3. Use the special mode switch command: [MODE_SWITCH:mode_name]
-4. Continue the conversation in the new mode
-
-Available modes:
-- casual: Friendly conversations and general assistance
-- elite-code: Advanced code generation with best practices
-- creative: Stories, poems, and creative content
-- math-science: Mathematical problems and scientific explanations
-- problem-solver: Strategic thinking and complex problem resolution
-- researcher: In-depth research and academic support
-- speed: Fast responses with quick solutions
-- visionary: Innovative ideas and future-thinking
-- mentor: Learning and skill development guidance
-
-When switching modes, use the format: [MODE_SWITCH:mode_name] in your response, and I'll handle the mode change automatically.
+${getModeSwitchingInstructions()}
 
 ${
   userName
@@ -466,26 +351,7 @@ ${
 - Help debug and troubleshoot issues
 - Teach debugging and problem-solving skills
 
-**Mode Switching Capability:**
-You have the ability to switch between different conversation modes based on user requests. If a user asks to change modes, you should:
-
-1. Acknowledge the mode change request
-2. Explain what the new mode offers
-3. Use the special mode switch command: [MODE_SWITCH:mode_name]
-4. Continue the conversation in the new mode
-
-Available modes:
-- casual: Friendly conversations and general assistance
-- elite-code: Advanced code generation with best practices
-- creative: Stories, poems, and creative content
-- math-science: Mathematical problems and scientific explanations
-- problem-solver: Strategic thinking and complex problem resolution
-- researcher: In-depth research and academic support
-- speed: Fast responses with quick solutions
-- visionary: Innovative ideas and future-thinking
-- mentor: Learning and skill development guidance
-
-When switching modes, use the format: [MODE_SWITCH:mode_name] in your response, and I'll handle the mode change automatically.
+${getModeSwitchingInstructions()}
 
 ${
   userName

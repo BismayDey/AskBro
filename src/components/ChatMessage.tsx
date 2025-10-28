@@ -157,6 +157,56 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
                     </code>
                   );
                 },
+                strong: ({ children }) => (
+                  <strong className="font-semibold text-gray-900 dark:text-white">
+                    {children}
+                  </strong>
+                ),
+                em: ({ children }) => (
+                  <em className="italic text-gray-700 dark:text-gray-300">
+                    {children}
+                  </em>
+                ),
+                ul: ({ children }) => (
+                  <ul className="list-disc list-inside space-y-1 my-2">
+                    {children}
+                  </ul>
+                ),
+                ol: ({ children }) => (
+                  <ol className="list-decimal list-inside space-y-1 my-2">
+                    {children}
+                  </ol>
+                ),
+                li: ({ children }) => (
+                  <li className="text-gray-800 dark:text-gray-200">
+                    {children}
+                  </li>
+                ),
+                blockquote: ({ children }) => (
+                  <blockquote className="border-l-4 border-blue-500 pl-4 italic my-2 text-gray-700 dark:text-gray-300">
+                    {children}
+                  </blockquote>
+                ),
+                h1: ({ children }) => (
+                  <h1 className="text-lg font-bold text-gray-900 dark:text-white mb-2 mt-4">
+                    {children}
+                  </h1>
+                ),
+                h2: ({ children }) => (
+                  <h2 className="text-base font-semibold text-gray-900 dark:text-white mb-2 mt-3">
+                    {children}
+                  </h2>
+                ),
+                h3: ({ children }) => (
+                  <h3 className="text-sm font-medium text-gray-900 dark:text-white mb-1 mt-2">
+                    {children}
+                  </h3>
+                ),
+                p: ({ children }) => (
+                  <p className="mb-2 last:mb-0 text-gray-800 dark:text-gray-200">
+                    {children}
+                  </p>
+                ),
               }}
             >
               {message.content}
@@ -171,10 +221,10 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
           )}
         </div>
 
-        {/* Action Buttons - Always visible below user messages */}
-        {isUser && !isWelcome && (
+        {/* Action Buttons - Always visible below messages */}
+        {!isWelcome && (
           <div className="flex gap-2 mt-2 px-2">
-            {onEdit && (
+            {isUser && onEdit && (
               <button
                 onClick={() =>
                   onEdit(
